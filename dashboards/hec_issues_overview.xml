@@ -1,0 +1,223 @@
+<form version="1.1">
+  <label>HEC Issues Overview</label>
+  <search id="base_search1">
+    <query>
+      index=_internal component=HttpInputDataHandler reply!=0 NOT (channel!=n/a reply=5 http_input_body_size=0)
+            | lookup hec_reply_codes reply_code AS reply OUTPUT status_message reason action
+            | fields _time name reply status_message reason action 
+    </query>
+    <earliest>$time.earliest$</earliest>
+    <latest>$time.latest$</latest>
+  </search>
+  <fieldset submitButton="true" autoRun="false">
+    <input type="time" token="time">
+      <label></label>
+      <default>
+        <earliest>-4h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <single>
+        <title>Number Of Tokens Sending Data ($time.earliest$ - $time.latest$)</title>
+        <search>
+          <query>
+            index=_introspection sourcetype=http_event_collector_metrics data.series=http_event_collector_token
+            | stats dc(data.token_name)
+          </query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <html>
+        <hr/>
+        <b>General Overview of Issues</b>
+        <hr/>
+      </html>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>HEC Error Messages ($time.earliest$ - $time.latest$)</title>
+      <chart>
+        <search base="base_search1">
+          <query>
+            | timechart count by status_message limit=17
+          </query>
+        </search>
+        <option name="charting.axisTitleX.visibility">collapsed</option>
+        <option name="charting.axisTitleY.visibility">collapsed</option>
+        <option name="charting.axisTitleY2.visibility">collapsed</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.legend.placement">none</option>
+        <option name="trellis.enabled">1</option>
+        <option name="trellis.scales.shared">0</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>HEC Tokens with Errors ($time.earliest$ - $time.latest$)</title>
+      <chart>
+        <search base="base_search1">
+          <query>
+            | timechart count by name limit=0
+          </query>
+        </search>
+        <option name="charting.axisTitleX.visibility">collapsed</option>
+        <option name="charting.axisTitleY.visibility">collapsed</option>
+        <option name="charting.axisTitleY2.visibility">collapsed</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.legend.placement">none</option>
+        <option name="trellis.enabled">1</option>
+        <option name="trellis.scales.shared">0</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <html>
+        <hr/>
+        <b>Token Specific Issues</b>
+        <hr/>
+      </html>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <input type="dropdown" token="token_name" searchWhenChanged="true">
+        <label>Token to look into:</label>
+        <fieldForLabel>name</fieldForLabel>
+        <fieldForValue>name</fieldForValue>
+        <search base="base_search1">
+          <query> | stats count by name | fields - count</query>
+        </search>
+      </input>
+      <table>
+        <search base="base_search1">
+          <query>
+            | search name="$token_name$" | dedup status_message | table status_message reason action | rename status_message AS "Status Message" reason AS Reason action AS "Corrective Action Needed"
+          </query>
+        </search>
+        <option name="drilldown">none</option>
+      </table>
+      <chart>
+        <search base="base_search1">
+          <query>
+            | search name="$token_name$" | timechart count by status_message
+          </query>
+        </search>
+        <option name="charting.chart">line</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <event>
+        <search>
+          <query>
+            index=_internal component=HttpInputDataHandler reply=* NOT (channel!=n/a reply=5 http_input_body_size=0) name="$token_name$"
+            | lookup hec_reply_codes reply_code AS reply OUTPUT status_message
+          </query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+        <option name="list.drilldown">full</option>
+        <option name="raw.drilldown">full</option>
+        <option name="table.drilldown">all</option>
+        <option name="type">raw</option>
+      </event>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <html>
+        <hr/>
+        <b>Specific Status Messages Issues</b>
+        <hr/>
+      </html>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <input type="dropdown" token="status_message1" searchWhenChanged="true">
+        <label>Status message to look into:</label>
+        <fieldForLabel>status_message</fieldForLabel>
+        <fieldForValue>reply</fieldForValue>
+        <search base="base_search1">
+          <query>
+            | search reply!=9 reply!=7
+            | stats values(reply) AS reply by status_message
+          </query>
+        </search>
+      </input>
+      <table>
+        <search base="base_search1">
+          <query>
+            | search reply=$status_message1$ | dedup status_message | table status_message reason action | rename status_message AS "Status Message" reason AS Reason action AS "Corrective Action Needed"
+          </query>
+        </search>
+        <option name="drilldown">none</option>
+      </table>
+      <chart>
+        <search base="base_search1">
+          <query>
+            | search reply=$status_message1$
+            | timechart count by name
+          </query>
+        </search>
+        <option name="charting.chart">line</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Tokens with messages</title>
+      <table>
+        <search base="base_search1">
+          <query>| search reply=$status_message1$ | stats count by name</query>
+        </search>
+        <option name="drilldown">none</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <html>
+        <hr/>
+        <b>Incorrect Index Issues</b>
+        <hr/>
+      </html>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <search base="base_search1">
+          <query>
+            | search reply=7 | dedup status_message | table status_message reason action | rename status_message AS "Status Message" reason AS Reason action AS "Corrective Action Needed"
+          </query>
+        </search>
+        <option name="drilldown">none</option>
+      </table>
+      <table>
+        <search>
+          <query>index=_internal component=HttpInputDataHandler | transaction host component startswith="Incorrect index" endswith="reply=7" | rex field=_raw "index=\'(?&lt;Incorrect_Index&gt;[^\']+)\'" | stats values(Incorrect_Index) AS "Incorrect Index(es)" by name | rename name as Token</query>
+          <earliest>$time.earliest$</earliest>
+          <latest>$time.latest$</latest>
+        </search>
+        <option name="count">10</option>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+  </row>
+</form>
