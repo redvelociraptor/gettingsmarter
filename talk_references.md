@@ -1,5 +1,5 @@
 This document's source location: [References & Additional info for .conf23 PLA1335B "Getting Smarter about Splunk SmartStore"](https://github.com/redvelociraptor/gettingsmarter/)
-Author: Nadine Miller, aka `vraptor` on Community Slack, and `redvelociraptor` on github.com.
+Author: Nadine Miller, aka `vraptor` on Splunk Community Slack (join here https://splk.it/slack) , and `redvelociraptor` on github.com.
 
 # PLA1335 References & Further Information
 
@@ -46,11 +46,13 @@ In a more complete form, a data dictionary could go much further, providing info
 Resources for building data dictionaries:
 
  * [Splunk Blog: Data Dictionary](https://www.splunk.com/en_us/blog/learn/data-dictionary.html)
- * [LAME Creations: Splunk Using a Custom Dashboard and KVs to Create a Data Dictionary](https://www.youtube.com/watch?v=HVNMgCqSGnI) (This channel also has a good series on bridging the gap from Splunk Search training to real-world use for Security Analysts, could be helpful to help end users as well.)
-
-
+ * [LAME Creations: Splunk Using a Custom Dashboard and KVs to Create a Data Dictionary](https://www.youtube.com/watch?v=HVNMgCqSGnI) 
+    (This channel also has a good series on bridging the gap from Splunk Search training to real-world use for Security Analysts, could be helpful for end users as well.)
 
 [![CC BY-NC-ND 4.0][cc-by-nc-nd-image]][cc-by-nc-nd]
+
+
+
 [cc-by-nc-nd]: http://creativecommons.org/licenses/by-nc-nd/4.0/
 [cc-by-nc-nd-image]: https://i.creativecommons.org/l/by-nc-nd/4.0/88x31.png
 [cc-by-nc-nd-shield]: https://img.shields.io/badge/License-CC%20BY--NC--ND%204.0-lightgrey.svg
