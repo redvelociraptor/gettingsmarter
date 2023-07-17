@@ -3,6 +3,7 @@
 This repository contains helpful resources to go along with the Splunk .conf23 Breakout Session PLA1335B, "Getting Smarter About Splunk Smartstore: Best Practices or Bust."
 
 The documents, dashboards within the repo are licensed under Creative Commons Attribution-NonCommercial-NoDerivatives [CC BY-NC-ND](https://github.com/redvelociraptor/gettingsmarter/blob/main/LICENSE.md). Further details [here](https://creativecommons.org/licenses/by-nc-nd/4.0/).
+
 [![CC BY-NC-ND 4.0][cc-by-nc-nd-image]][cc-by-nc-nd]
 
 
