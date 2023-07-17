@@ -7,7 +7,7 @@ The documents, dashboards within the repo are licensed under Creative Commons At
 [![CC BY-NC-ND 4.0][cc-by-nc-nd-image]][cc-by-nc-nd]
 
 
-TL;DR: You may share unmodified versions with attribution, but you may not *share derivatives* (remix, incorporate in your own works, etc.) nor sell this work in this repository commercially.
+TL;DR: You may share unmodified versions with attribution, but you may not *share derivatives* (remix, incorporate in your own works, etc.) nor sell the work in this repository commercially.
 
 The following dashboards and accompanying CSV were created by Joe Gedeon:
 
