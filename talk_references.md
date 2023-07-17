@@ -22,7 +22,7 @@ The restrictions on SmartStore use as of July 2023 (refer to Splunk docs [About 
 ### Getting Data In
 Aplura has a handy reference for GDI available: [Data Onboarding Cheat Sheet](https://www.aplura.com/assets/pdf/onboarding_cheatsheet.pdf)
 
-#### Essential Best Practice for HEC: 
+#### Essential Best Practice for HEC 
 If you use the HEC indexer acknowledgement feature, ensure the following:
 
  * useACK is enabled at your indexers for the HEC endpoint you are using. In Splunk Cloud Platform, useACK is **only** enabled for the Firehose endpoint, as an example.

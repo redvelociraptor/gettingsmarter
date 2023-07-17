@@ -1,5 +1,7 @@
 <form version="1.1">
   <!--Author: Joe Gedeon-->
+  <!--Source of this version: https://github.com/redvelociraptor/gettingsmarter/-->
+  <!--This dashboard relies on the hec_reply_codes.csv file located in the above repo-->
   <label>HEC Issues Overview</label>
   <search id="base_search1">
     <query>

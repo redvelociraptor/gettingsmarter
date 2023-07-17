@@ -1,5 +1,6 @@
 <form version="1.1">
   <!--Author: Joe Gedeon-->
+  <!--Source of this version: https://github.com/redvelociraptor/gettingsmarter/-->
   <label>Hot Bucket Roll Info</label>
   <description>How often are buckets rolling and what are the timespans of events in the bucket.</description>
   <init>
