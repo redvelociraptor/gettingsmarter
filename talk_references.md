@@ -20,7 +20,46 @@ The restrictions on SmartStore use as of July 2023 (refer to Splunk docs [About 
  * In a multisite index cluster, any SmartStore enabled index must have search affinity disabled if report acceleration or data model acceleration is used. E.g. Set all search heads to site0.
 
 ### Getting Data In
+
+Properly setting the "great eight" is key to getting your data onboarded correctly. Explicitly setting these has the additional benefit of lowering ingestion overhead on your indexers because Splunk doesn't have run every single event through it's internal analysis routines.
+
+IMO your priority to properly on-board data, in order:
+
+1. Time stamps properly extracted
+2. Correct line breaking
+3. Correct line merging
+3. Correct truncation
+4. Correct sourcetype
+5. Correct index
+
+Recall the Great Eight:
+
+`TIME_PREFIX
+MAX_TIMESTAMP_LOOKAHEAD
+TIME_FORMAT
+SHOULD_LINEMERGE
+LINE_BREAKER
+TRUNCATE
+TZ
+EVENT_BREAKER_ENABLE
+EVENT_BREAKER
+`
+
+Create a test instance so as to not disrupt production servers while testing data onboarding configurations. This can be as simple as a VM on your workstation, but having a VM or server  that can handle all ingestion configurations from your production environment will speed up the process, since it will allow you to identify any configuration layering issues more quickly.
+
+Reference: https://docs.splunk.com/Documentation/Splunk/latest/Admin/Propsconf
+
 Aplura has a handy reference for GDI available: [Data Onboarding Cheat Sheet](https://www.aplura.com/assets/pdf/onboarding_cheatsheet.pdf)
+
+#### About `forceTimebasedAutoLB`
+
+Many still use `forceTimebasedAutoLB` on Universal Forwarder to send data to indexers, as many versions ago it was the only way to prevent UFs from "pinning" to indexers. Pinning resulted in poor distribution of data, or in some cases, overwhelming the indexer's queues. `forceTimebasedAutoLB` should no longer be used. With the introduction of `EVENT_BREAKER` and `EVENT_BREAKER_ENABLE` when combined with either `autoLBFrequency` or `autoLBVolume` data should be properly balanced across indexers without risk of overwhelming a single indexer.
+
+`forceTimebasedAutoLB` can cause data to be dropped, even with useACK enabled. And when applied to high volume data, it nearly always causes some events to be broken mid-event, with a portion of the event landing on two different indexers. 
+
+A Splunk blog post dives into a detailed technical discussion of `forceTimebasedAutoLB` and the risks: [Splunk Forwarders and Forced Time Based Load Balancing](https://community.splunk.com/t5/Community-Blog/Splunk-Forwarders-and-Forced-Time-Based-Load-Balancing/ba-p/608204)
+
+**Also note**: _Never set `autoLBFrequency` lower than 30 seconds._ Doing so will cause your indexers to spend more time creating and tearing down network connections than indexing data. It's more effective to increase `autoLBFrequency` to 60 or even 90 seconds, or switch to `autoLBVolume`.
 
 #### Essential Best Practice for HEC 
 If you use the HEC indexer acknowledgement feature, ensure the following:
@@ -47,7 +86,7 @@ Resources for building data dictionaries:
 
  * [Splunk Blog: Data Dictionary](https://www.splunk.com/en_us/blog/learn/data-dictionary.html)
  * [LAME Creations: Splunk Using a Custom Dashboard and KVs to Create a Data Dictionary](https://www.youtube.com/watch?v=HVNMgCqSGnI) 
-    (This channel also has a good series on bridging the gap from Splunk Search training to real-world use for Security Analysts, could be helpful for end users as well.)
+    (This channel also has a good series on bridging the gap from Splunk Search training to real-world use for Security Analysts, could be helpful for end users as well. The channel owner won "The Guide" Splunkie Award.)
 
 [![CC BY-NC-ND 4.0][cc-by-nc-nd-image]][cc-by-nc-nd]
 
