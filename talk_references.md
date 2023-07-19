@@ -34,16 +34,15 @@ IMO your priority to properly on-board data, in order:
 
 Recall the Great Eight:
 
-`TIME_PREFIX
-MAX_TIMESTAMP_LOOKAHEAD
-TIME_FORMAT
-SHOULD_LINEMERGE
-LINE_BREAKER
-TRUNCATE
-TZ
-EVENT_BREAKER_ENABLE
-EVENT_BREAKER
-`
+`TIME_PREFIX`  
+`MAX_TIMESTAMP_LOOKAHEAD`  
+`TIME_FORMAT`  
+`SHOULD_LINEMERGE`  
+`LINE_BREAKER`  
+`TRUNCATE`  
+`TZ`  
+`EVENT_BREAKER_ENABLE`  
+`EVENT_BREAKER`  
 
 Create a test instance so as to not disrupt production servers while testing data onboarding configurations. This can be as simple as a VM on your workstation, but having a VM or server  that can handle all ingestion configurations from your production environment will speed up the process, since it will allow you to identify any configuration layering issues more quickly.
 
