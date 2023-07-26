@@ -14,6 +14,10 @@
         <latest>now</latest>
       </default>
     </input>
+    <input type="text" token="idx_host_tok">
+      <label>Indexer hostname pattern</label>
+      <default>idx-*</default>
+    </input>
   </fieldset>
   <row>
     <panel>
@@ -29,21 +33,25 @@
       </html>
       <table>
         <search>
-          <query>index=_internal host=idx-* sourcetype=splunkd component=HotBucketRoller idx=*
+          <query>index=_internal host="$idx_host_tok$" sourcetype=splunkd component=HotBucketRoller idx=*
 | eval bucket_type=if(like(from, "hot_quar_%"),"Quarantine", "Normal")
 | rex field=to "db_(?&lt;latest_time&gt;\d{10})_(?&lt;earliest_time&gt;\d{10})"
 | eval latest_btime=strftime(latest_time,"%Y-%m-%d %H:%M:%S")
 | eval earliest_btime=strftime(earliest_time,"%Y-%m-%d %H:%M:%S")
-| eval date_span=tostring((latest_time - earliest_time),"duration")
-| eval bucket_size=case(size&gt;=(1024*1024*1024*1024),round(size/(1024*1024*1024*1024),0)."TB", size&gt;=(1024*1024*1024),round(size/(1024*1024*1024),0)."GB", size&gt;=(1024*1024),round(size/(1024*1024),0)."MB", size&gt;=1024,round(size/1024,0)."KB", 1=1,size."B")
-| table idx bucket_type earliest_btime latest_btime date_span bucket_size
-| rename idx AS "Index" bucket_type AS "Bucket Type" earliest_btime AS "Earliest Event Time in Bucket" latest_btime AS "Latest Event Time in Bucket" date_span AS "Date Span for Bucket" bucket_size AS "Bucket Size"
-| sort - "Date Span for Bucket"</query>
+| eval date_span=(latest_time - earliest_time)
+| table idx bucket_type earliest_btime latest_btime date_span size bid
+| rename idx AS "Index" bucket_type AS "Bucket Type" earliest_btime AS "Earliest Event Time in Bucket" latest_btime AS "Latest Event Time in Bucket" date_span AS "Date Span for Bucket" size AS "Bucket Size" bid as _bid
+| sort - "Date Span for Bucket"
+| fieldformat "Date Span for Bucket" = tostring('Date Span for Bucket', "duration")
+| fieldformat "Bucket Size"=case('Bucket Size'&gt;=(1024*1024*1024*1024),round('Bucket Size'/(1024*1024*1024*1024),0)."TB", 'Bucket Size'&gt;=(1024*1024*1024),round('Bucket Size'/(1024*1024*1024),0)."GB", 'Bucket Size'&gt;=(1024*1024),round('Bucket Size'/(1024*1024),0)."MB", 'Bucket Size'&gt;=1024,round('Bucket Size'/1024,0)."KB", 1=1,'Bucket Size'."B")</query>
           <earliest>$time.earliest$</earliest>
           <latest>$time.latest$</latest>
         </search>
-        <option name="drilldown">none</option>
+        <option name="drilldown">row</option>
         <option name="refresh.display">progressbar</option>
+        <drilldown>
+          <link target="_blank">search?q=index%3D_internal%20host%3D$idx_host_tok$%20source%3D*splunkd.log*%20$row._bid$&amp;earliest=$time.earliest$&amp;latest=$time.latest$</link>
+        </drilldown>
       </table>
     </panel>
   </row>
@@ -51,13 +59,15 @@
     <panel>
       <chart>
         <search>
-          <query>index=_internal host=idx-* sourcetype=splunkd component=HotBucketRoller idx=* | timechart count by idx limit=0</query>
+          <query>index=_internal host="$idx_host_tok$" sourcetype=splunkd component=HotBucketRoller idx=*
+| timechart count by idx limit=0</query>
           <earliest>$time.earliest$</earliest>
           <latest>$time.latest$</latest>
         </search>
         <option name="charting.chart">column</option>
         <option name="charting.chart.stackMode">stacked</option>
         <option name="charting.drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
       </chart>
     </panel>
   </row>
@@ -66,7 +76,8 @@
       <chart>
         <title>Freezing Activity</title>
         <search>
-          <query>index=_internal host=c0m1-* source="/opt/splunk/var/log/splunk/splunkd.log" component=CMMaster event=removeBucket frozen=true | dedup bid | timechart span=1m count</query>
+          <query>index=_internal host=c0m1-* source="*splunkd.log*" component=CMMaster event=removeBucket frozen=true
+| timechart span=1m dc(bid)</query>
           <earliest>$time.earliest$</earliest>
           <latest>$time.latest$</latest>
         </search>
